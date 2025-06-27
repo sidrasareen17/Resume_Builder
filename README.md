@@ -34,8 +34,8 @@ A simple and elegant Resume Builder built with HTML, CSS, and JavaScript — ins
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/resume-builder.git
-   cd resume-builder
+https://github.com/sidrasareen17/Resume_Builder.git
+ gh repo clone sidrasareen17/Resume_Builder
 
 
 2. Open index.html in your browser
