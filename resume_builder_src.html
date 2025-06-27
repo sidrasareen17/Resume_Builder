@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Elegant Resume Builder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --main-bg: #f3e5f5;
+      --primary: #4a148c;
+      --text-dark: #333;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--main-bg);
+      overflow-x: hidden;
+    }
+
+    .container {
+      display: flex;
+      width: 500vw;
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .page {
+      width: 100vw;
+      height: 100vh;
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    h1, h2 {
+      color: var(--primary);
+    }
+
+    input, textarea, select {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .horizontal-nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: #fff;
+      padding: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      z-index: 10;
+    }
+
+    .horizontal-nav button {
+      margin-right: 10px;
+    }
+
+    .resume-preview {
+      padding: 20px;
+    }
+
+    .resume-template {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-dark);
+    }
+
+    .resume-template .profile-pic {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .resume-template .profile-pic img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--primary);
+    }
+
+    .template-normal {
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .template-standard {
+      border: 2px solid var(--primary);
+      background: #fafafa;
+    }
+
+    .template-classic {
+      background: linear-gradient(135deg, #fdfbfb, #ebedee);
+      border-left: 6px solid var(--primary);
+      padding-left: 40px;
+    }
+
+    .skills-preview span {
+      font-weight: bold;
+      margin-right: 10px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="horizontal-nav">
+  <button onclick="goToPage(0)">Home</button>
+  <button onclick="goToPage(1)">Register</button>
+  <button onclick="goToPage(2)">Login</button>
+  <button onclick="goToPage(3)">Builder</button>
+  <button onclick="goToPage(4)">Preview</button>
+</div>
+
+<div class="container" id="pageContainer">
+
+  <!-- Page 1: Landing -->
+  <div class="page" style="background:#f8eafc;">
+    <h1>Welcome to ResumeBuilder</h1>
+    <p>Create beautiful resumes in minutes.</p>
+    <button onclick="goToPage(1)">Get Started</button>
+  </div>
+
+  <!-- Page 2: Register -->
+  <div class="page">
+    <h2>Register</h2>
+    <input type="text" id="regName" placeholder="Full Name">
+    <input type="email" id="regEmail" placeholder="Email">
+    <input type="password" id="regPass" placeholder="Password">
+    <button onclick="registerUser()">Register</button>
+  </div>
+
+  <!-- Page 3: Login -->
+  <div class="page">
+    <h2>Login</h2>
+    <input type="text" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button onclick="loginUser()">Login</button>
+  </div>
+
+  <!-- Page 4: Resume Builder -->
+  <div class="page">
+    <h2>Resume Details</h2>
+    <input type="text" id="fullName" placeholder="Full Name">
+    <input type="text" id="phone" placeholder="Phone">
+    <input type="text" id="address" placeholder="Address">
+    <textarea id="summary" placeholder="Professional Summary"></textarea>
+    <input type="text" id="skillsInput" placeholder="Skills (comma separated)">
+    <input type="file" id="profilePic" accept="image/*">
+
+    <label for="templateStyle"><strong>Template Style:</strong></label>
+    <select id="templateStyle">
+      <option value="normal">Normal</option>
+      <option value="standard">Standard</option>
+      <option value="classic">Classic</option>
+    </select>
+
+    <textarea id="experience" placeholder="Work Experience (each line as job)"></textarea>
+    <textarea id="projects" placeholder="Projects (each line as project)"></textarea>
+
+    <button onclick="generateResume()">Generate Resume</button>
+  </div>
+
+  <!-- Page 5: Preview -->
+  <div class="page">
+    <h2>Preview</h2>
+    <div class="resume-preview" id="resumePreview"></div>
+    <button onclick="goToPage(3)">Edit</button>
+    <button onclick="downloadPDF()">Download PDF</button>
+  </div>
+
+</div>
+
+<!-- External Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- Core Script -->
+<script>
+  let currentPage = 0;
+  const pageContainer = document.getElementById('pageContainer');
+
+  function goToPage(pageNum) {
+    currentPage = pageNum;
+    pageContainer.style.transform = translateX(-${100 * pageNum}vw);
+  }
+
+  const users = {};
+
+  function registerUser() {
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const pass = document.getElementById('regPass').value;
+    if (!name || !email || !pass) return alert("All fields required.");
+    users[email] = { name, pass };
+    alert("Registered! Please login.");
+    goToPage(2);
+  }
+
+  function loginUser() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    if (users[email] && users[email].pass === pass) {
+      sessionStorage.setItem("loggedInUser", email);
+      goToPage(3);
+    } else {
+      alert("Invalid credentials");
+    }
+  }
+
+  function generateResume() {
+    const fullName = document.getElementById('fullName').value;
+    const phone = document.getElementById('phone').value;
+    const address = document.getElementById('address').value;
+    const summary = document.getElementById('summary').value;
+    const skills = document.getElementById('skillsInput').value.split(',').map(s => s.trim()).filter(Boolean);
+    const experience = document.getElementById('experience').value.split('\n').filter(Boolean);
+    const projects = document.getElementById('projects').value.split('\n').filter(Boolean);
+    const template = document.getElementById('templateStyle').value;
+    const resumeClass = resume-template template-${template};
+    const picInput = document.getElementById('profilePic');
+    const reader = new FileReader();
+
+    const updateResumeHTML = (imgURL = '') => {
+      document.getElementById('resumePreview').innerHTML = `
+        <div class="${resumeClass}">
+          <div class="profile-pic">${imgURL ? <img src="${imgURL}" /> : ''}</div>
+          <h3 style="text-align:center;">${fullName}</h3>
+          <p><strong>Phone:</strong> ${phone}</p>
+          <p><strong>Address:</strong> ${address}</p>
+          <h4>Summary</h4>
+          <p>${summary}</p>
+          <h4>Skills</h4>
+          <p class="skills-preview">${skills.map(s => <span>${s}</span>).join('')}</p>
+          <h4>Experience</h4>
+          <ul>${experience.map(e => <li>${e}</li>).join('')}</ul>
+          <h4>Projects</h4>
+          <ul>${projects.map(p => <li>${p}</li>).join('')}</ul>
+        </div>`;
+      goToPage(4);
+    };
+
+    if (picInput.files[0]) {
+      reader.onload = function (e) {
+        updateResumeHTML(e.target.result);
+      };
+      reader.readAsDataURL(picInput.files[0]);
+    } else {
+      updateResumeHTML();
+    }
+  }
+
+  async function downloadPDF() {
+    const resume = document.getElementById('resumePreview');
+    const canvas = await html2canvas(resume, { scale: 2, useCORS: true });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save('resume.pdf');
+  }
+</script>
+
+</body>
+</html>
